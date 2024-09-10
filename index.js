@@ -7,9 +7,7 @@ var { getUnitRegexp } = require("./src/pixel-unit-regexp");
 
 var defaults = {
   unitToConvert: "px",
-  viewportWidth: 375,
-  viewportWidthPaid: 750,
-  viewportWidthPc: 1920,
+  viewportWidth: 320,
   viewportHeight: 568, // not now used; TODO: need for different units and math for different properties
   unitPrecision: 5,
   viewportUnit: "vw",
@@ -22,10 +20,6 @@ var defaults = {
   landscape: false,
   landscapeUnit: "vw",
   landscapeWidth: 568,
-  width2Tailwind: {
-    viewportWidthPaid: "md",
-    viewportWidthPc: "xl",
-  },
 };
 
 module.exports = postcss.plugin("postcss-px-to-viewport", function (options) {
