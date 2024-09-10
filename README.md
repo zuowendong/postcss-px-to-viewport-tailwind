@@ -1,4 +1,4 @@
-# @zwd/postcss-px-to-viewport
+# postcss-px-to-viewport-tailwind
 
 Use postcss-px-to-viewport and tailwindcss can dynamically change the viewport width.
 
