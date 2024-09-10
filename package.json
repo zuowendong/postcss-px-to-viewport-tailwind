@@ -1,0 +1,34 @@
+{
+  "name": "@zwd/postcss-px-to-viewport",
+  "version": "1.0.0",
+  "description": "postcss-px-to-viewport with tailwindcss can dynamically change the viewport width",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zuowendong/postcss-px-to-viewport.git"
+  },
+  "author": "Zuo Wendong <zuoguguji@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zuowendong/postcss-px-to-viewport/issues"
+  },
+  "homepage": "https://github.com/zuowendong/postcss-px-to-viewport#readme",
+  "keywords": [
+    "css",
+    "units",
+    "pixel",
+    "px",
+    "viewport",
+    "vw",
+    "vh",
+    "postcss",
+    "postcss-plugin",
+    "tailwindcss"
+  ],
+  "devDependencies": {
+    "postcss": "^8.4.45"
+  }
+}
