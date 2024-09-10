@@ -22,136 +22,143 @@ var defaults = {
   landscapeWidth: 568,
 };
 
-module.exports = postcss.plugin("postcss-px-to-viewport", function (options) {
+module.exports = (options) => {
   var opts = objectAssign({}, defaults, options);
 
   var pxRegex = getUnitRegexp(opts.unitToConvert);
   var satisfyPropList = createPropListMatcher(opts.propList);
   var landscapeRules = [];
 
-  return function (css) {
-    css.walkRules(function (rule) {
-      // Add exclude option to ignore some files like 'node_modules'
-      var file = rule.source && rule.source.input.file;
+  return {
+    postcssPlugin: "postcss-px-to-viewport-tailwind",
+    Once(css) {
+      css.walkRules(function (rule) {
+        // Add exclude option to ignore some files like 'node_modules'
+        var file = rule.source && rule.source.input.file;
 
-      if (opts.exclude && file) {
-        if (
-          Object.prototype.toString.call(opts.exclude) === "[object RegExp]"
-        ) {
-          if (isExclude(opts.exclude, file)) return;
-        } else if (
-          Object.prototype.toString.call(opts.exclude) === "[object Array]"
-        ) {
-          for (let i = 0; i < opts.exclude.length; i++) {
-            if (isExclude(opts.exclude[i], file)) return;
+        if (opts.exclude && file) {
+          if (
+            Object.prototype.toString.call(opts.exclude) === "[object RegExp]"
+          ) {
+            if (isExclude(opts.exclude, file)) return;
+          } else if (
+            Object.prototype.toString.call(opts.exclude) === "[object Array]"
+          ) {
+            for (let i = 0; i < opts.exclude.length; i++) {
+              if (isExclude(opts.exclude[i], file)) return;
+            }
+          } else {
+            throw new Error("options.exclude should be RegExp or Array.");
           }
-        } else {
-          throw new Error("options.exclude should be RegExp or Array.");
         }
-      }
 
-      if (blacklistedSelector(opts.selectorBlackList, rule.selector)) return;
+        if (blacklistedSelector(opts.selectorBlackList, rule.selector)) return;
 
-      if (opts.landscape && !rule.parent.params) {
-        var landscapeRule = rule.clone().removeAll();
+        if (opts.landscape && !rule.parent.params) {
+          var landscapeRule = rule.clone().removeAll();
 
-        rule.walkDecls(function (decl) {
+          rule.walkDecls(function (decl) {
+            if (decl.value.indexOf(opts.unitToConvert) === -1) return;
+            if (!satisfyPropList(decl.prop)) return;
+
+            landscapeRule.append(
+              decl.clone({
+                value: decl.value.replace(
+                  pxRegex,
+                  createPxReplace(opts, opts.landscapeUnit, opts.landscapeWidth)
+                ),
+              })
+            );
+          });
+
+          if (landscapeRule.nodes.length > 0) {
+            landscapeRules.push(landscapeRule);
+          }
+        }
+
+        if (!validateParams(rule.parent.params, opts.mediaQuery)) return;
+
+        rule.walkDecls(function (decl, i) {
           if (decl.value.indexOf(opts.unitToConvert) === -1) return;
           if (!satisfyPropList(decl.prop)) return;
 
-          landscapeRule.append(
-            decl.clone({
-              value: decl.value.replace(
-                pxRegex,
-                createPxReplace(opts, opts.landscapeUnit, opts.landscapeWidth)
-              ),
-            })
-          );
-        });
+          var unit;
+          var size;
+          var params = rule.parent.params;
 
-        if (landscapeRule.nodes.length > 0) {
-          landscapeRules.push(landscapeRule);
-        }
-      }
+          if (opts.landscape && params && params.indexOf("landscape") !== -1) {
+            unit = opts.landscapeUnit;
+            size = opts.landscapeWidth;
+          } else {
+            unit = getUnit(decl.prop, opts);
+            size = opts.viewportWidth;
 
-      if (!validateParams(rule.parent.params, opts.mediaQuery)) return;
+            if (opts.width2Tailwind) {
+              var tailwindPoint = {};
+              const keys = Object.keys(opts.width2Tailwind);
+              keys.forEach((key) => {
+                tailwindPoint[opts.width2Tailwind[key]] = opts[key];
+              });
 
-      rule.walkDecls(function (decl, i) {
-        if (decl.value.indexOf(opts.unitToConvert) === -1) return;
-        if (!satisfyPropList(decl.prop)) return;
-
-        var unit;
-        var size;
-        var params = rule.parent.params;
-
-        if (opts.landscape && params && params.indexOf("landscape") !== -1) {
-          unit = opts.landscapeUnit;
-          size = opts.landscapeWidth;
-        } else {
-          unit = getUnit(decl.prop, opts);
-          size = opts.viewportWidth;
-
-          if (opts.width2Tailwind) {
-            var tailwindPoint = {};
-            const keys = Object.keys(opts.width2Tailwind);
-            keys.forEach((key) => {
-              tailwindPoint[opts.width2Tailwind[key]] = opts[key];
-            });
-
-            if (tailwindPoint.sm && decl.parent.selector.search(".sm") !== -1) {
-              size = tailwindPoint.sm;
-            } else if (
-              tailwindPoint.md &&
-              decl.parent.selector.search(".md") !== -1
-            ) {
-              size = tailwindPoint.md;
-            } else if (
-              tailwindPoint.lg &&
-              decl.parent.selector.search(".lg") !== -1
-            ) {
-              size = tailwindPoint.lg;
-            } else if (
-              tailwindPoint.xl &&
-              decl.parent.selector.search(".xl") !== -1
-            ) {
-              size = tailwindPoint.xl;
-            } else if (
-              tailwindPoint["2xl"] &&
-              decl.parent.selector.search(".2xl") !== -1
-            ) {
-              size = tailwindPoint["2xl"];
+              if (
+                tailwindPoint.sm &&
+                decl.parent.selector.search(".sm") !== -1
+              ) {
+                size = tailwindPoint.sm;
+              } else if (
+                tailwindPoint.md &&
+                decl.parent.selector.search(".md") !== -1
+              ) {
+                size = tailwindPoint.md;
+              } else if (
+                tailwindPoint.lg &&
+                decl.parent.selector.search(".lg") !== -1
+              ) {
+                size = tailwindPoint.lg;
+              } else if (
+                tailwindPoint.xl &&
+                decl.parent.selector.search(".xl") !== -1
+              ) {
+                size = tailwindPoint.xl;
+              } else if (
+                tailwindPoint["2xl"] &&
+                decl.parent.selector.search(".2xl") !== -1
+              ) {
+                size = tailwindPoint["2xl"];
+              }
             }
           }
-        }
 
-        var value = decl.value.replace(
-          pxRegex,
-          createPxReplace(opts, unit, size)
-        );
+          var value = decl.value.replace(
+            pxRegex,
+            createPxReplace(opts, unit, size)
+          );
 
-        if (declarationExists(decl.parent, decl.prop, value)) return;
+          if (declarationExists(decl.parent, decl.prop, value)) return;
 
-        if (opts.replace) {
-          decl.value = value;
-        } else {
-          decl.parent.insertAfter(i, decl.clone({ value: value }));
-        }
-      });
-    });
-
-    if (landscapeRules.length > 0) {
-      var landscapeRoot = new postcss.atRule({
-        params: "(orientation: landscape)",
-        name: "media",
+          if (opts.replace) {
+            decl.value = value;
+          } else {
+            decl.parent.insertAfter(i, decl.clone({ value: value }));
+          }
+        });
       });
 
-      landscapeRules.forEach(function (rule) {
-        landscapeRoot.append(rule);
-      });
-      css.append(landscapeRoot);
-    }
+      if (landscapeRules.length > 0) {
+        var landscapeRoot = new postcss.atRule({
+          params: "(orientation: landscape)",
+          name: "media",
+        });
+
+        landscapeRules.forEach(function (rule) {
+          landscapeRoot.append(rule);
+        });
+        css.append(landscapeRoot);
+      }
+    },
   };
-});
+};
+module.exports.postcss = true;
 
 function getUnit(prop, opts) {
   return prop.indexOf("font") === -1
