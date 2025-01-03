@@ -11,7 +11,7 @@ postcss: {
     autoprefixer: {
       overrideBrowserslist: ["last 5 version", ">1%", "ie >=8"],
     },
-    "postcss-px-to-viewport": {
+    "postcss-px-to-viewport-tailwind": {
       unitToConvert: "px",
       viewportWidth: 375,
       viewportWidthPaid: 750,
