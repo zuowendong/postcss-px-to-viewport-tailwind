@@ -94,37 +94,22 @@ module.exports = (options) => {
             size = opts.viewportWidth;
 
             if (opts.width2Tailwind) {
-              var tailwindPoint = {};
-              const keys = Object.keys(opts.width2Tailwind);
-              keys.forEach((key) => {
-                tailwindPoint[opts.width2Tailwind[key]] = opts[key];
-              });
+              // 直接从配置创建断点映射
+              const tailwindPoint = Object.entries(opts.width2Tailwind).reduce(
+                (acc, [key, breakpoint]) => {
+                  acc[breakpoint] = opts[key];
+                  return acc;
+                },
+                {}
+              );
 
-              if (
-                tailwindPoint.sm &&
-                decl.parent.selector.search(".sm") !== -1
-              ) {
-                size = tailwindPoint.sm;
-              } else if (
-                tailwindPoint.md &&
-                decl.parent.selector.search(".md") !== -1
-              ) {
-                size = tailwindPoint.md;
-              } else if (
-                tailwindPoint.lg &&
-                decl.parent.selector.search(".lg") !== -1
-              ) {
-                size = tailwindPoint.lg;
-              } else if (
-                tailwindPoint.xl &&
-                decl.parent.selector.search(".xl") !== -1
-              ) {
-                size = tailwindPoint.xl;
-              } else if (
-                tailwindPoint["2xl"] &&
-                decl.parent.selector.search(".2xl") !== -1
-              ) {
-                size = tailwindPoint["2xl"];
+              // 查找匹配的断点
+              const matchedBreakpoint = Object.keys(tailwindPoint).find(
+                (point) => decl.parent.selector.includes(`.${point}`)
+              );
+
+              if (matchedBreakpoint) {
+                size = tailwindPoint[matchedBreakpoint];
               }
             }
           }
