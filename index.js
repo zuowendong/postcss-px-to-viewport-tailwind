@@ -20,6 +20,7 @@ var defaults = {
   landscape: false,
   landscapeUnit: "vw",
   landscapeWidth: 568,
+  allowedBreakpoints: null, // 允许转换的断点列表，默认为 null
 };
 
 module.exports = (options) => {
@@ -91,10 +92,9 @@ module.exports = (options) => {
             size = opts.landscapeWidth;
           } else {
             unit = getUnit(decl.prop, opts);
-            size = opts.viewportWidth;
 
+            // 如果启用了 width2Tailwind，则只处理配置的断点
             if (opts.width2Tailwind) {
-              // 直接从配置创建断点映射
               const tailwindPoint = Object.entries(opts.width2Tailwind).reduce(
                 (acc, [key, breakpoint]) => {
                   acc[breakpoint] = opts[key];
@@ -103,14 +103,31 @@ module.exports = (options) => {
                 {}
               );
 
-              // 查找匹配的断点
               const matchedBreakpoint = Object.keys(tailwindPoint).find(
                 (point) => decl.parent.selector.includes(`.${point}`)
               );
 
+              // 如果匹配到断点
               if (matchedBreakpoint) {
+                // 如果设置了 allowedBreakpoints，则需要检查断点是否在允许列表中
+                if (
+                  opts.allowedBreakpoints &&
+                  !opts.allowedBreakpoints.includes(matchedBreakpoint)
+                ) {
+                  return;
+                }
                 size = tailwindPoint[matchedBreakpoint];
+              } else {
+                // 如果没有匹配到断点，使用默认的 viewportWidth
+                if (opts.allowedBreakpoints) {
+                  // 如果配置了 allowedBreakpoints，没有匹配到断点就不转换
+                  return;
+                }
+                size = opts.viewportWidth;
               }
+            } else {
+              // 如果没有启用 width2Tailwind，使用默认的 viewportWidth
+              size = opts.viewportWidth;
             }
           }
 
