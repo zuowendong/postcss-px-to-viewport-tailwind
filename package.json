@@ -1,6 +1,6 @@
 {
   "name": "postcss-px-to-viewport-tailwind",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "postcss-px-to-viewport with tailwindcss can dynamically change the viewport width",
   "main": "index.js",
   "scripts": {
