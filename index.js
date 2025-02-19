@@ -104,7 +104,9 @@ module.exports = (options) => {
               );
 
               const matchedBreakpoint = Object.keys(tailwindPoint).find(
-                (point) => decl.parent.selector.includes(`.${point}`)
+                (point) =>
+                  decl.parent.selector.startsWith(".") &&
+                  decl.parent.selector.includes(point)
               );
 
               // 如果匹配到断点
