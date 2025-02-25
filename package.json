@@ -2,20 +2,26 @@
   "name": "postcss-px-to-viewport-tailwind",
   "version": "2.0.1",
   "description": "postcss-px-to-viewport with tailwindcss can dynamically change the viewport width",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "rollup -c",
+    "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zuowendong/postcss-px-to-viewport.git"
+    "url": "git+https://github.com/zuowendong/postcss-px-to-viewport-tailwind.git"
   },
   "author": "Zuo Wendong <zuoguguji@gmail.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/zuowendong/postcss-px-to-viewport/issues"
+    "url": "https://github.com/zuowendong/postcss-px-to-viewport-tailwind/issues"
   },
-  "homepage": "https://github.com/zuowendong/postcss-px-to-viewport#readme",
+  "homepage": "https://github.com/zuowendong/postcss-px-to-viewport-tailwind#readme",
   "keywords": [
     "css",
     "units",
@@ -29,7 +35,12 @@
     "tailwindcss"
   ],
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.8",
+    "@rollup/plugin-node-resolve": "^15.3.1",
+    "@rollup/plugin-terser": "^0.4.4",
     "object-assign": "^4.1.1",
-    "postcss": "^8.4.45"
-  }
+    "postcss": "^8.4.45",
+    "rollup": "^4.34.8"
+  },
+  "type": "module"
 }

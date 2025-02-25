@@ -1,11 +1,11 @@
 "use strict";
 
-var postcss = require("postcss");
-var objectAssign = require("object-assign");
-var { createPropListMatcher } = require("./src/prop-list-matcher");
-var { getUnitRegexp } = require("./src/pixel-unit-regexp");
+import postcss from "postcss";
+import objectAssign from "object-assign";
+import { createPropListMatcher } from "./src/prop-list-matcher";
+import { getUnitRegexp } from "./src/pixel-unit-regexp";
 
-var defaults = {
+const defaults = {
   unitToConvert: "px",
   viewportWidth: 320,
   viewportHeight: 568, // not now used; TODO: need for different units and math for different properties
@@ -23,7 +23,7 @@ var defaults = {
   allowedBreakpoints: null, // 允许转换的断点列表，默认为 null
 };
 
-module.exports = (options) => {
+export const pxToViewport = (options) => {
   var opts = objectAssign({}, defaults, options);
 
   var pxRegex = getUnitRegexp(opts.unitToConvert);
@@ -162,7 +162,8 @@ module.exports = (options) => {
     },
   };
 };
-module.exports.postcss = true;
+
+export const postcssPlugin = true;
 
 function getUnit(prop, opts) {
   return prop.indexOf("font") === -1
