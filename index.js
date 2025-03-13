@@ -114,7 +114,7 @@ export const pxToViewport = (options) => {
               const matchedBreakpoint = Object.keys(tailwindPoint).find(
                 (point) =>
                   decl.parent.selector.startsWith(".") &&
-                  decl.parent.selector.includes(`${point}-`)
+                  decl.parent.selector.includes(`${point}:`)
               );
 
               console.log("Debug - Matched breakpoint:", matchedBreakpoint);
