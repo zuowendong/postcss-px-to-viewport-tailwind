@@ -98,13 +98,18 @@ export const pxToViewport = (options) => {
             if (opts.width2Tailwind) {
               const tailwindPoint = Object.entries(opts.width2Tailwind).reduce(
                 (acc, [key, breakpoint]) => {
-                  acc[breakpoint] = opts[key];
+                  if (opts[key]) {
+                    acc[breakpoint] = opts[key];
+                  }
                   return acc;
                 },
                 {}
               );
 
-              console.log("Debug - Tailwind breakpoints:", tailwindPoint); // 添加调试日志
+              console.log(
+                "Debug - Tailwind breakpoints mapping:",
+                tailwindPoint
+              );
 
               const matchedBreakpoint = Object.keys(tailwindPoint).find(
                 (point) =>
@@ -112,30 +117,37 @@ export const pxToViewport = (options) => {
                   decl.parent.selector.includes(`${point}-`)
               );
 
-              console.log("Debug - Matched breakpoint:", matchedBreakpoint); // 添加调试日志
-              console.log("Debug - Current selector:", decl.parent.selector); // 添加调试日志
+              console.log("Debug - Matched breakpoint:", matchedBreakpoint);
+              console.log("Debug - Current selector:", decl.parent.selector);
 
-              // 如果匹配到断点
-              if (matchedBreakpoint) {
-                // 检查是否在允许的断点列表中
+              // 检查是否设置了 allowedBreakpoints
+              if (opts.allowedBreakpoints?.length > 0) {
+                // 如果设置了 allowedBreakpoints，只转换允许的断点
                 if (
-                  opts.allowedBreakpoints?.length > 0 &&
-                  !opts.allowedBreakpoints.includes(matchedBreakpoint)
+                  matchedBreakpoint &&
+                  opts.allowedBreakpoints.includes(matchedBreakpoint)
                 ) {
-                  shouldTransform = false; // 不进行转换
+                  size = tailwindPoint[matchedBreakpoint];
+                  console.log(
+                    "Debug - Using size:",
+                    size,
+                    "for allowed breakpoint:",
+                    matchedBreakpoint
+                  );
                 } else {
+                  // 不在允许列表中的断点，直接返回，保持 px
+                  return;
+                }
+              } else {
+                // 如果没有设置 allowedBreakpoints，转换所有配置的断点
+                if (matchedBreakpoint && tailwindPoint[matchedBreakpoint]) {
                   size = tailwindPoint[matchedBreakpoint];
                   console.log(
                     "Debug - Using size:",
                     size,
                     "for breakpoint:",
                     matchedBreakpoint
-                  ); // 添加调试日志
-                }
-              } else {
-                // 如果没有匹配到断点，使用默认的 viewportWidth
-                if (opts.allowedBreakpoints?.length > 0) {
-                  shouldTransform = false; // 不进行转换
+                  );
                 } else {
                   size = opts.viewportWidth;
                 }

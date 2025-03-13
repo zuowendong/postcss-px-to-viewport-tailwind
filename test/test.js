@@ -19,17 +19,23 @@ const configs = [
     name: "测试场景1：只允许 sm 和 lg 断点转换",
     options: {
       unitToConvert: "px",
-      viewportWidth: 375,
-      viewportWidth2: 768, // 768px
-      viewportWidth3: 1024, // 1024px
-      unitPrecision: 5,
-      viewportUnit: "vw",
+      viewportWidth: 750,
+      viewportWidth1: 1024,
+      viewportWidth2: 1920,
       width2Tailwind: {
-        viewportWidth: "sm", // 375px
-        viewportWidth2: "md", // 768px
-        viewportWidth3: "lg", // 1024px
+        viewportWidth1: "md",
+        viewportWidth2: "lg",
       },
-      // allowedBreakpoints: ["sm", "md"],
+      // allowedBreakpoints: ["md", "lg"],
+      unitPrecision: 5,
+      propList: ["*"],
+      viewportUnit: "vw",
+      fontViewportUnit: "vw",
+      selectorBlackList: [],
+      minPixelValue: 1,
+      mediaQuery: false,
+      replace: true,
+      exclude: [/node_modules/],
     },
   },
   // {
