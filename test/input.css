@@ -1,0 +1,23 @@
+/* 普通样式 */
+.text {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* sm 断点样式 */
+.sm-text {
+  font-size: 16px;
+  padding: 10px;
+}
+
+/* md 断点样式 */
+.md-text {
+  font-size: 18px;
+  margin: 20px;
+}
+
+/* lg 断点样式 */
+.lg-text {
+  font-size: 24px;
+  width: 100px;
+} 

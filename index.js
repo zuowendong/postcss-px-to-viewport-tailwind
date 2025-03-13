@@ -2,8 +2,8 @@
 
 import postcss from "postcss";
 import objectAssign from "object-assign";
-import { createPropListMatcher } from "./src/prop-list-matcher";
-import { getUnitRegexp } from "./src/pixel-unit-regexp";
+import { createPropListMatcher } from "./src/prop-list-matcher.js";
+import { getUnitRegexp } from "./src/pixel-unit-regexp.js";
 
 const defaults = {
   unitToConvert: "px",
@@ -86,6 +86,7 @@ export const pxToViewport = (options) => {
           var unit;
           var size;
           var params = rule.parent.params;
+          var shouldTransform = true; // 添加标志来控制是否要转换
 
           if (opts.landscape && params && params.indexOf("landscape") !== -1) {
             unit = opts.landscapeUnit;
@@ -103,35 +104,49 @@ export const pxToViewport = (options) => {
                 {}
               );
 
+              console.log("Debug - Tailwind breakpoints:", tailwindPoint); // 添加调试日志
+
               const matchedBreakpoint = Object.keys(tailwindPoint).find(
                 (point) =>
                   decl.parent.selector.startsWith(".") &&
-                  decl.parent.selector.includes(point)
+                  decl.parent.selector.includes(`${point}-`)
               );
+
+              console.log("Debug - Matched breakpoint:", matchedBreakpoint); // 添加调试日志
+              console.log("Debug - Current selector:", decl.parent.selector); // 添加调试日志
 
               // 如果匹配到断点
               if (matchedBreakpoint) {
-                // 如果设置了 allowedBreakpoints，则需要检查断点是否在允许列表中
+                // 检查是否在允许的断点列表中
                 if (
-                  opts.allowedBreakpoints &&
+                  opts.allowedBreakpoints?.length > 0 &&
                   !opts.allowedBreakpoints.includes(matchedBreakpoint)
                 ) {
-                  return;
+                  shouldTransform = false; // 不进行转换
+                } else {
+                  size = tailwindPoint[matchedBreakpoint];
+                  console.log(
+                    "Debug - Using size:",
+                    size,
+                    "for breakpoint:",
+                    matchedBreakpoint
+                  ); // 添加调试日志
                 }
-                size = tailwindPoint[matchedBreakpoint];
               } else {
                 // 如果没有匹配到断点，使用默认的 viewportWidth
-                if (opts.allowedBreakpoints) {
-                  // 如果配置了 allowedBreakpoints，没有匹配到断点就不转换
-                  return;
+                if (opts.allowedBreakpoints?.length > 0) {
+                  shouldTransform = false; // 不进行转换
+                } else {
+                  size = opts.viewportWidth;
                 }
-                size = opts.viewportWidth;
               }
             } else {
-              // 如果没有启用 width2Tailwind，使用默认的 viewportWidth
               size = opts.viewportWidth;
             }
           }
+
+          // 如果不应该转换，直接返回
+          if (!shouldTransform) return;
 
           var value = decl.value.replace(
             pxRegex,
@@ -176,6 +191,7 @@ function createPxReplace(opts, viewportUnit, viewportSize) {
     if (!$1) return m;
     var pixels = parseFloat($1);
     if (pixels <= opts.minPixelValue) return m;
+    if (!viewportSize) return m; // 如果没有有效的 viewportSize，返回原始值
     var parsedVal = toFixed((pixels / viewportSize) * 100, opts.unitPrecision);
     return parsedVal === 0 ? "0" : parsedVal + viewportUnit;
   };
